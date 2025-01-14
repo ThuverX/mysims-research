@@ -1,7 +1,10 @@
 # Material
-stub.
+Materials define which shader along with what parameters the material uses.
 
 ## Pattern
+
+> [!WARNING]
+> Currently incomplete!
 ```c
 enum ValueType: u32 {
     color = 1,
@@ -274,6 +277,9 @@ Header header @ $;
 A material set is a list of references to material files.
 
 ## Pattern
+
+> [!WARNING]
+> Currently incomplete!
 ```c
 struct MaterialRef {
     u32 type;
