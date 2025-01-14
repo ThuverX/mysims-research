@@ -21,7 +21,18 @@ MySims (PC) contains these package files and are found in `MySims/SimsRevData`
 |`GameData_Win32/Sfx/Sfx.package`|Sfx|Sound effects|
 |`GameData/Lua/LuoDL.package`|LuoDL|Compiled lua files|
 
+## Format
+DBPF have some different names for the files that are inside, in this documentation we will refer to them in the following way:
+- Instance, hash - The name of the file. eg: `ticketmachine`
+- Group - This is like a folder, for example the `ticketmachine` group contains both the files for the model and material of the ticketmachine.
+- Type - This is the same as a file type, eg: `windowsmodel`, `material` or `xml`
+
+Its important to note that some of these values have not been unhashed and thus are refered to by their instance id, instead of an actual name.
+
 ## Pattern
+
+> [!WARNING]
+> Currently incomplete!
 ```c
 using FileType;
 using DBPFFile;

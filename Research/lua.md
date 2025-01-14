@@ -1,6 +1,6 @@
 # lua
 
-Game uses lua 5.1 as internal scripting, they almost always attach to gameobjects, but there are some hints on global classes too. They do not have engine access, only scripting capabilities and are therefore considered the 'front-end'.
+MySims uses lua 5.1 as internal scripting, they almost always attach to gameobjects, but there are some hints on global classes too. Lua does not have engine access, only scripting capabilities and are therefore considered the 'front-end'.
 
 ## Game Validation:
 When loading the game, it seems every lua script is validated after the intro screen (the one with the my sims logo being assembled by sims). If a script has an error, this often means the game won't let you choose your save.
