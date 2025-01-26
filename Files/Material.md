@@ -5,6 +5,58 @@ Materials define which shader along with what parameters the material uses.
 
 > [!WARNING]
 > Currently incomplete!
+```cpp
+import type.base;
+
+struct ResourceKey {
+    type::Hex<u64> instance;
+    type::Hex<u32> type;
+    type::Hex<u32> group;
+};
+
+struct MaterialParameter {
+    type::Hex<u32> type;
+    u32 valueType;
+    u32 valueFieldCount;
+    u32 offset;
+    
+    u32 jump = $;
+    $ = offset + 64;
+    
+    if(valueType == 1) {
+        float color[valueFieldCount];
+    } else if(valueType == 2) {
+        u32 value;
+    } else if(valueType == 4) {
+        ResourceKey mapKey;
+    }
+    
+    $ = jump;
+};
+
+struct MaterialData {
+    u32 one1;
+    u32 one2;
+    padding[8]; // all zero
+    u32 one3;
+    ResourceKey self;
+    u32 headerSize;
+    u32 totalSize;
+    char magic1[4];
+    u32 version;
+    type::Hex<u32> materialHash;
+    type::Hex<u32> shaderHash;
+    u32 mtrlSize;
+    char magic2[4];
+    padding[4]; // all zero
+    u32 dataSize;
+    u32 numParams;
+    MaterialParameter params[numParams];
+};
+
+MaterialData material @ $;
+```
+
 ```c
 enum ValueType: u32 {
     color = 1,
