@@ -36,3 +36,91 @@ stub.
 
 ## Model Pattern
 stub.
+```cpp
+import type.base;
+import std.string;
+
+using CString = std::string::NullString;
+
+struct Bone {
+    type::Hex<u32> ukn[16];
+};
+
+struct ResourceKey {
+    type::Hex<u64> instance;
+    type::Hex<u32> type;
+    type::Hex<u32> group;
+};
+
+struct Vector3 {
+    float x;
+    float y;
+    float z;
+};
+
+struct WindowsRig {
+    u32 numBones;
+    type::Hex<u32> boneHashes[numBones];
+    Bone bones[numBones];
+};
+
+struct VertexKey {
+    u32 offset;
+    u8 type;
+    u8 index;
+    u8 subIndex;
+};
+
+struct Face {
+    u16 a;
+    u16 b;
+    u16 c;
+};
+
+struct WindowsMesh {
+    ResourceKey material;
+    Vector3 boundsMin;
+    Vector3 boundsMax;
+    u32 ukn1[3];
+    u32 three;
+    padding [12]; // all zero
+    u32 numVerts;
+    u32 numFaces;
+    u32 vertexKeyCount;
+    VertexKey vertexKeys[vertexKeyCount];
+    u32 vertexArraySize;
+    u8 vertexData [vertexArraySize];
+    u32 facesArraySize;
+    Face faces[numFaces];
+    s32 rigIndex;
+};
+
+struct WindowsModel {
+    u8 four;
+    char magic[4];
+
+    u8 minorVersion;
+    u8 majorVersion;
+
+    padding [2];
+
+    Vector3 boundsMin;
+    Vector3 boundsMax;
+
+    u32 numExtraParams;
+    type::Hex<u32> extraParamKeys[numExtraParams];
+    if(numExtraParams != 0) {
+        u32 extraParamValueSize;
+        CString extraPramsValues[numExtraParams];
+    } else {
+        padding[1];
+    }
+    
+    u32 numRigs;
+    WindowsRig rigs[numRigs];
+    u32 numMeshes;
+    WindowsMesh meshes[numMeshes];
+};
+
+WindowsModel model @ $;
+```
