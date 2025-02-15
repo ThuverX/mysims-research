@@ -3,8 +3,6 @@ Materials define which shader along with what parameters the material uses.
 
 ## Pattern
 
-> [!WARNING]
-> Currently incomplete!
 ```cpp
 import type.base;
 
@@ -55,60 +53,6 @@ struct MaterialData {
 };
 
 MaterialData material @ $;
-```
-
-```c
-enum ValueType: u32 {
-    color = 1,
-    map = 4,
-    boolean = 2
-};
-
-struct MapExtraParamInfo {
-    u64 refHash;
-    FileType refType;
-    padding[4];
-};
-
-struct BooleanExtraParamInfo {
-    u32 value [[hidden]];
-};
-
-struct ColorExtraParamInfo {
-    float r;
-    float g;
-    float b;
-    float a;
-};
-
-struct Param {
-    ParamName name;
-    ValueType valueType;
-    u32 valueFieldCount;
-    u32 offset;
-    u32 jump = $;
-    $ = offset + 64;
-    if(valueType == ValueType::map) {
-        MapExtraParamInfo extraParamInfo;
-    } else if(valueType == ValueType::boolean) {
-        BooleanExtraParamInfo extraParamInfo;
-    } else if(valueType == ValueType::color) {
-        ColorExtraParamInfo extraParamInfo; // TODO: This uses valueFieldCount
-    }
-
-    $ = jump;
-};
-
-struct Header {
-    $ = 56;
-    u32 shaderId;
-    $ += 12;
-    u32 dataSize;
-    u32 numParams;
-    Param params[numParams];
-};
-
-Header header @ $;
 ```
 
 ## Parameter names
@@ -330,30 +274,35 @@ A material set is a list of references to material files.
 
 ## Pattern
 
-> [!WARNING]
-> Currently incomplete!
-```c
-struct MaterialRef {
-    u32 type;
-    u32 group;
-    u64 instance;
+```cpp
+import type.base;
+
+struct ResourceKey {
+    type::Hex<u64> instance;
+    type::Hex<u32> type;
+    type::Hex<u32> group;
 };
 
 struct MTST {
-    char magic[4]; // Must be MTST
+    char magic[4];
     u32 version;
     u32 name;
     u32 index;
     u32 count;
     u32 indicies[count];
+    padding[4];
 };
 
 struct MaterialSet {
-    u32 ukn1[3];
-    u32 count;
-    u32 ukn2[3];
-    MaterialRef materials[count];
-    MaterialRef ukn3;
+    u32 one1;
+    u32 one2;
+    padding[4];
+    u32 materialCount;
+    u32 one3;
+    ResourceKey selfKey;
+    ResourceKey materials[materialCount];
+    u32 headerSize;
+    u32 mtstSize;
     MTST mtst;
 };
 
