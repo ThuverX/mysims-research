@@ -6,7 +6,7 @@ Shaders have the file extension `.fx` or `.fxh`, and can be found in `GameData_W
 Shaders use HLSL, the primary language for shaders used in [DirectX](https://en.wikipedia.org/wiki/DirectX). The `.fx` files contain both the Pixel and Vertex Shaders.
 
 ## Shader hashes
-[Materials](/Files/Material.md#material) reference shaders using their [FNV32](/FNV.md) hash:
+[Materials](/mysims-research/Files/Material.md#material) reference shaders using their [FNV32](/mysims-research/FNV.md) hash:
 
 |Name|Hash|
 |----|----|

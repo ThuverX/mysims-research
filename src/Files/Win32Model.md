@@ -3,7 +3,7 @@
 Specific model files used only in the windows version of MySims. We don't know their exact extension, but the Taco Bell version refers to them as Win32Models. They can contain a list of models and a list of [meshes](#win32-mesh).
 
 ## Win32 Mesh
-Win32 meshes are parts of a model that usually share the same material. The game refers to them as "Drawables". They contain a reference to a [Material](/Files/Material.md), a vertex list, and a face list.
+Win32 meshes are parts of a model that usually share the same material. The game refers to them as "Drawables". They contain a reference to a [Material](/mysims-research/Files/Material.md), a vertex list, and a face list.
 
 ### Vertex keys
 Vertices are read using a list of vertex keys, which tell the engine how the vertices should be read. This is mostlikely done for space optimization.
