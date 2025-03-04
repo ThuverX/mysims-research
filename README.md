@@ -1,1 +1,1 @@
-[Github Pages](https://thuverx.github.io/mysims-research/)
+[Wiki](https://thuverx.github.io/mysims-research/index.html)
