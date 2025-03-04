@@ -31,7 +31,8 @@ Its important to note that some of these values have not been unhashed and thus 
 
 ## Pattern
 
-> [!WARNING]
+> ⚠️ WARNING
+>
 > Currently incomplete!
 ```c
 using FileType;
