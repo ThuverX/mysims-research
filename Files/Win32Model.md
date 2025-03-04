@@ -25,17 +25,7 @@ struct VertexKey {
 };
 ```
 
-### Mesh Pattern
-stub.
-
-## Win32 Rig
-stub.
-
-### Rig Pattern
-stub.
-
 ## Model Pattern
-stub.
 ```cpp
 import type.base;
 import std.string;
@@ -81,7 +71,8 @@ struct WindowsMesh {
     ResourceKey material;
     Vector3 boundsMin;
     Vector3 boundsMax;
-    u32 ukn1[3];
+    u32 ukn1[2];
+    u32 name;
     u32 three;
     padding [12]; // all zero
     u32 numVerts;
