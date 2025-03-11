@@ -1,11 +1,18 @@
 # Summary
 
-- [Introduction]()
-    - [Index](index.md)
-    - [FNV](FNV.md)
+- [Introduction](index.md)
 
-- [File Types]()
+- [Modding](Modding/index.md)
+    - [Installing](Modding/Installing.md)
+    - [Creating]()
+        - [Your first mod](Modding/HowTo/FirstMod.md)
+        - [A global controller](Modding/HowTo/GlobalMod.md)
+
+# Technical
+
+- [File Formats]()
     - [Big](Files/Big.md)
+        - [Const](Files/Apt/Const.md)
     - [Bnk](Files/Bnk.md)
     - [Clip](Files/Clip.md)
     - [DBPF](Files/DBPF.md)
@@ -15,6 +22,9 @@
     - [Win32 Model](Files/Win32Model.md)
     - [Xmb](Files/Xmb.md)
 
-- [XML Files]()
-    - [Level](Files/Xml/Level.md)
-    - [World](Files/Xml/World.md)
+    - [XML Files]()
+        - [Level](Files/Xml/Level.md)
+        - [World](Files/Xml/World.md)
+
+- [Resource Keys](ResourceKey.md)
+- [FNV](FNV.md)

@@ -1,6 +1,8 @@
 # MySims Research
 These files try to document MySims (PC) to the best of our ability. And do not document any of MySims sequels or MySims DS.
 
+**Interested in making mods? This wiki now also includes information on how to mod the game using the MySims Modloader [here](Modding/index.md)**.
+
 > ⚠️ IMPORTANT
 >
 > These documents are a work in progress.
@@ -22,6 +24,8 @@ MySims was released multiple times on different platforms.
 |Cozy Bundle PC|2025|Unknown||
 
 ## Formats
+
+> Any time a "hash" or "id" is mentioned we are talking about an [FNV](./FNV.md) hash.
 
 Some of these formats are based on the research done by [Morcutool](https://github.com/Olivercomet/MorcuTool).
 
