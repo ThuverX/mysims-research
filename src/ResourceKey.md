@@ -22,6 +22,7 @@ We usually show these files like this: `0x00000000!0x00000000EE93FAC8.dds`. Wher
 
 # Examples
 Here are some examples:
+
 |Resource Key|Real Path|Found in|
 |------------|---------|--------|
 |0x2C593B57!0x0000000000000001.windowsmodel|afAccessorySalonGlasses/1.windowsmodel|Characters.package|
