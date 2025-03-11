@@ -22,7 +22,7 @@ Most of these things we will tackle in the next section, but in case you need a 
 - Controllers only run their `run()` function once by default.
 - Controllers don't by default have Class Constructors (not to be confused with `constructor()` function. That's different. See **"Using a Constructor-like way to set up our controller"** below.)
 - Controllers don't save your variable data by default, after save & Quitting the game.
-- You can set up a controller through an interaction call. (See "How to destroy my controller", so you don't end up with a billion controllers in one world.)
+- You can set up a controller through an interaction call.
 - Controllers will keep their current data whenever you go from one world to another
 
 
