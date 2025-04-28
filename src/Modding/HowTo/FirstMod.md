@@ -1,4 +1,6 @@
 # Creating your first mod
+> ⚠️ **The modloader is still undergoing changes.**
+
 1. To start create a folder and name it anything you want. This is usually the same name as the mod itself.
 2. Create a `mod.xml` inside this folder
 
@@ -153,5 +155,3 @@ And once you load a savefile, you will be greeted!
 
 
 That's it! Texture replacement are more generically `file` replacers. So you can also replace XML files or anything else. Though some file formats are hard to create, something the [Editor](https://github.com/ThuverX/MySimsEditor) will fix once it's released!
-
-Still have questions? [Join the Discord server](https://discord.gg/2j9mU6zNJH).

@@ -1,5 +1,7 @@
 # Level
 
+{{#include ../../includes/MySimsSpecific.md}}
+
 A level is a collection of models with some meta data, like grid size.
 
 ## Format

@@ -1,5 +1,7 @@
 # Shaders
 
+> ⚠️ This page is outdated and does not apply to any Cozy Bundle version.
+
 Shaders have the file extension `.fx` or `.fxh`, and can be found in `GameData_Win32/Shaders`.
 
 ## HLSL

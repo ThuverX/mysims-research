@@ -1,6 +1,8 @@
 # Creating a global mod (Controller)
-**NOTE:** This approach requires you to make use of the [MySims ModLoader](https://github.com/ThuverX/MySimsModLoader/wiki/How-to-make-mods#32-lua-hook). 
-Make sure you've set that up first before proceeding! 
+> ⚠️ **The modloader is still undergoing changes.**
+
+> **This approach requires you to make use of the [MySims ModLoader](../index.md).**
+> **Make sure you've set that up first before proceeding!**
 
 From this point on, the term "global mod" will be now considered a "Controller" as that's what Maxis has done as well.
 

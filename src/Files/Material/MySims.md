@@ -1,7 +1,12 @@
 # Material
-Materials define which shader along with what parameters the material uses.
 
-## Pattern
+{{#include ../../includes/MySimsSpecific.md}}
+
+> Check out the Kingdom version [here](./Kingdom.md).
+
+Materials define which shader along with what [parameters](#parameter-names) the material uses.
+
+## Material pattern
 
 ```cpp
 import type.base;
@@ -55,9 +60,51 @@ struct MaterialData {
 MaterialData material @ $;
 ```
 
+# Material Set
+A material set is a list of references to material files.
+
+## MySims Pattern
+
+
+
+```cpp
+import type.base;
+
+struct ResourceKey {
+    type::Hex<u64> instance;
+    type::Hex<u32> type;
+    type::Hex<u32> group;
+};
+
+struct MTST {
+    char magic[4];
+    u32 version;
+    u32 name;
+    u32 index;
+    u32 count;
+    u32 indicies[count];
+    padding[4];
+};
+
+struct MaterialSet {
+    u32 one1;
+    u32 one2;
+    padding[4];
+    u32 materialCount;
+    u32 one3;
+    ResourceKey selfKey;
+    ResourceKey materials[materialCount];
+    u32 headerSize;
+    u32 mtstSize;
+    MTST mtst;
+};
+
+MaterialSet materialSet @ $;
+```
+
 ## Parameter names
-|name|hash|
-|----|----|
+|Name|ID|
+|-|-|
 |diffuseColor|0x7FEE2D1A|
 |useLights|0x76F88689|
 |highlightMultiplier|0x2616B09A|
@@ -268,43 +315,3 @@ MaterialData material @ $;
 |auBodyLabCoat|0xBCC02D91|
 |envmapAlpha|0x0A345310|
 |door_archedTopBar|0x4A1A7937|
-
-# Material Set
-A material set is a list of references to material files.
-
-## Pattern
-
-```cpp
-import type.base;
-
-struct ResourceKey {
-    type::Hex<u64> instance;
-    type::Hex<u32> type;
-    type::Hex<u32> group;
-};
-
-struct MTST {
-    char magic[4];
-    u32 version;
-    u32 name;
-    u32 index;
-    u32 count;
-    u32 indicies[count];
-    padding[4];
-};
-
-struct MaterialSet {
-    u32 one1;
-    u32 one2;
-    padding[4];
-    u32 materialCount;
-    u32 one3;
-    ResourceKey selfKey;
-    ResourceKey materials[materialCount];
-    u32 headerSize;
-    u32 mtstSize;
-    MTST mtst;
-};
-
-MaterialSet materialSet @ $;
-```

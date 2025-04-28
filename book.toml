@@ -4,3 +4,16 @@ language = "en"
 multilingual = false
 src = "src"
 title = "MySims Modding & Research"
+
+[output.html]
+git-repository-url = "https://github.com/ThuverX/mysims-research"
+edit-url-template = "https://github.com/ThuverX/mysims-research/edit/main/{path}"
+
+[output.html.search]
+limit-results = 20
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 2
+boost-paragraph = 1
+expand = true
+heading-split-level = 2

@@ -44,4 +44,4 @@ struct ResourceKey {
 };
 ```
 
-[^1]: This is how the MySims Cozy Bundle for the switch stores its files.
+[^1]: This is how the MySims Cozy Bundle (PC/Switch) stores its files.
