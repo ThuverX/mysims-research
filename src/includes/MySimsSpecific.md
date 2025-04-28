@@ -1,2 +1,2 @@
-> <img alt="MySims Logo" src="/images/mysims.png" height="120" /><br/><br/>
+> <img alt="MySims Logo" src="/mysims-research/images/mysims.png" height="120" /><br/><br/>
 > This information only applies to MySims.
