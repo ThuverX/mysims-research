@@ -6,6 +6,7 @@ src = "src"
 title = "MySims Modding & Research"
 
 [output.html]
+site-url = "/mysims-research/"
 git-repository-url = "https://github.com/ThuverX/mysims-research"
 edit-url-template = "https://github.com/ThuverX/mysims-research/edit/main/{path}"
 
