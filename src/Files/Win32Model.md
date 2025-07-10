@@ -33,7 +33,7 @@ import std.string;
 using CString = std::string::NullString;
 
 struct Bone {
-    type::Hex<u32> ukn[16];
+    float transform[16]; // 4x4 matrix
 };
 
 struct ResourceKey {
