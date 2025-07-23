@@ -83,7 +83,6 @@ struct MTST {
     u32 index;
     u32 count;
     u32 indicies[count];
-    padding[4];
 };
 
 struct MaterialSet {
