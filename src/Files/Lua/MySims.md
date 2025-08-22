@@ -1,9 +1,13 @@
-# lua
+# Lua
 
-MySims uses lua 5.1 as internal scripting, they almost always attach to gameobjects, but there are some hints on global classes too. Lua does not have engine access, only scripting capabilities and are therefore considered the 'front-end'.
+{{#include ../../includes/MySimsSpecific.md}}
+
+MySims uses lua 5.1 as internal scripting, they almost always attach to GameObjects, but there are some hints on global classes too. Lua does not have engine access, only scripting capabilities and is therefore considered the 'front-end'.
+
+<!-- toc -->
 
 ## Game Validation:
-When loading the game, it seems every lua script is validated after the intro screen (the one with the my sims logo being assembled by sims). If a script has an error, this often means the game won't let you choose your save.
+When loading the game, it seems every lua script is validated after the intro screen (the one with the MySims logo being assembled by sims). If a script has an error, this often means the game won't let you choose your save.
 
 However, if your script passed the screen, another way to figure out there's a fault somewhere, is when your playable sim will just teleport in random places in the world.
 
@@ -40,10 +44,10 @@ Now, you might be curious why we don't use pcall() here to error check instead. 
 While there are libraries that "patch" this out, this won't be possible with the way lua libraries are installed.
 
 
-## Game Objects:
+## GameObjects:
 Meant in a very broad way. Including not just furniture and what we would consider *"objects"* in the real world, but also: *sims, furniture, trees, Essences, Buildings, etc.* Excluding the level or the world.
 
-All Game Objects that are NOT Player built through CAB (Create a Build), inherit the class **"ScriptObjectBase"**. It sets up the bare basics for our game object to eventually make it possible to do things. It also handles tuning values (aka, the values we can adjust for something to happen more/less) and has an inherited animations table we can use.
+All GameObjects that are NOT Player built through CAB (Create a Build), inherit the class **"ScriptObjectBase"**. It sets up the bare basics for our GameObject to eventually make it possible to do things. It also handles tuning values (aka, the values we can adjust for something to happen more/less) and has an inherited animations table we can use.
 
 Objects that are however CAB-made, use "ConstructedObjectBase" instead. Often the interactions are split from the main script object's class script, probably to avoid huge files.
 
@@ -101,7 +105,7 @@ end
 ```
 
 
-Keep in mind that the game seems to point to also use an XML of the game Object to refer to some definitions. Probably to instantiate the item with the right assets from the game file packages?
+Keep in mind that the game seems to point to also use an XML of the GameObject to refer to some definitions. Probably to instantiate the item with the right assets from the game file packages?
 
 Here's an example (Keep in mind that these objects are considered ScriptObjectBase!!):
 
@@ -205,16 +209,16 @@ This is where the magic happens. Here, we make the interaction useable and anima
 
             -- 'sim' can be anything, but EA only uses it for sims for obvious reasons.
             -- Pushes the sim to follow another interaction, canceling the previous one so this one can now play.
-            sim:PushInteraction( self, "Start", nil, nil, true ) -- Game object with interaction, classname of interaction, potential params needed for your interaction, boolean = ? not sure yet. If it's the same as TS3, means if it should continue as pushed.
+            sim:PushInteraction( self, "Start", nil, nil, true ) -- GameObject with interaction, classname of interaction, potential params needed for your interaction, boolean = ? not sure yet. If it's the same as TS3, means if it should continue as pushed.
 
 
-            -- Returns a vector3 of the pos of your game object:
+            -- Returns a vector3 of the pos of your GameObject:
             local x,y,z = GetGameObjectPosition(self)
 
 
             -- returns a vector3 type for where the slot position and rotation is:
             -- EA only seems to want the x and y variable, hence the _ which stands for "blank".
-            local x,_,z    = GetSlotPositionRotation(obj, SlotTypes.kRoutingSlot, 0) -- params: game object itself, slot name, z index?
+            local x,_,z    = GetSlotPositionRotation(obj, SlotTypes.kRoutingSlot, 0) -- params: GameObject itself, slot name, z index?
 
             -- Gets the object rotation. returns a vector3.
             local _,yRot,_ = GetGameObjectOrientation(obj) -- Pararms: GameObject.
@@ -223,7 +227,7 @@ This is where the magic happens. Here, we make the interaction useable and anima
             local y = GetFloorHeightAt( pos.x, 0, pos.z ) -- Make sure to at least grab and parse the x and z positions!
 
             -- Is object facing other object?
-            -- Here I made a quick example of what it could look like. obj: can be game object or sim. sim can be game object or sim.
+            -- Here I made a quick example of what it could look like. obj: can be GameObject or sim. sim can be GameObject or sim.
             obj:IsFacing(sim)
 
             -- rotate the sim/object towards the pos given. 
@@ -277,7 +281,7 @@ This is where the magic happens. Here, we make the interaction useable and anima
     
 
             -- Set a timer. This is useful if a function needs firing every second, minute, day or hour. (It's good to check "ActivityRocketLauncher's "CreateTimer()" function for inspiration)
-            -- MAKE SURE TO CREATE AN NIL OBJECT UNDER CONTRUCTION! Call it timer or whatever you like. Just don't refer to your game object!!
+            -- MAKE SURE TO CREATE AN NIL OBJECT UNDER CONTRUCTION! Call it timer or whatever you like. Just don't refer to your GameObject!!
             TODTimerCreateRel( self.timer, days, hours, minutes, seconds ) -- Params: If you don't need to set any time units, just set it to 0.
           
             -- Kill Timer, otherwise it will never stop! D:
