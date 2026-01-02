@@ -1,3 +1,4 @@
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import React, { useState } from "react";
 import { ReactImageTurntable } from "react-image-turntable";
 import RenderIfVisible from "react-render-if-visible";
@@ -39,7 +40,7 @@ export const Turntable = (
                     }}
                     
                     autoRotate={{ disabled: true }}
-                    images={imageNames.map((img) => `/img/${folder}/${img}`)}
+                    images={imageNames.map((img) => useBaseUrl(`/img/${folder}/${img}`))}
                 />
             </RenderIfVisible>
         </div>
