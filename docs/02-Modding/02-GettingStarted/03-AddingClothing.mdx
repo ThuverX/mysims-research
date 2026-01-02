@@ -1,0 +1,82 @@
+import {Turntable, Grid} from '@site/src/components/Turntable';
+import {BodyList} from '@site/src/bodyList';
+
+# Adding new clothing
+
+> ⚠️ this currently only works in the Cozy Bundle version of the game.
+
+> ⚠️ this tweaker is still in development, only `Body` clothing has been tested so far.
+
+Adding new clothing is easy with the new clothing tweaker. Start by adding a file ending in `.outfit.xml` to your `assets` folder. And for now lets start with this template:
+```xml
+<Outfit
+	type="Body"
+	category="kBodyCasual"
+	gender="U"
+	texture="shirt_tex"
+	mask="shirt_mask">
+	<Name>shirt</Name>
+	<Model>afBodyMini</Model>
+	<Contexts>
+		<Context>kMaster</Context>
+		<Context>kInitial</Context>
+		<Context>kUpdateHead</Context>
+		<Context>kUpdateBody</Context>
+	</Contexts>
+</Outfit>
+```
+
+This xml contains all info required to add new clothing, except for the `texture` and `mask` textures, that you'll need to provide yourself.
+
+## Parts
+
+### Type
+Can either be `Body`, `Head`, `Eyes`, `Mouth` or `Accessory`. This tells the tweaker where to apply the new textures.
+
+### Category
+Depends on the type, can be:
+- `kBodyProfessional`, `kBodyCasual` for `Body`
+- `kHeadStandard`, `kHeadHat`, `kHeadHatNoHair`, `kHeadBald`, `kHeadBaldNoHair` for `Head`
+- `kEyesNormal` for `Eyes`
+- `kMouthNormal` for `Mouth`
+- `kAccessoryGlasses` for `Accessory`
+
+### Gender
+Can be `F`, `M` or `U`. For `Female`, `Male` or `Universal`. I suggest keeping this on `U` to let players wear anything!
+
+### Texture
+The name of texture for this clothing piece without the `.dds`. Here's an example for the above XML:
+
+<img alt="shirt_tex" src="/img/shirt_tex.png" height="512" />
+*(Amazing I know)*
+
+
+### Mask
+The name of the texture for the skin mask (without the `.dds`), this is a system introduced in Cozy Bundle allowing any skin color on any clothing item.
+
+<img alt="shirt_mask" src="/img/shirt_mask.png" height="512" />
+
+The darkness of a pixel determines shadow on the skin, while transparency means that there is no skin here.
+
+### Model
+One of a list of body models (Or a custom model) on which to apply this clothing material.
+
+### Name
+The internal name for this clothing piece, only used programmatically. Important to give it a unique name.
+
+### Contexts
+Determines in what wardrobe / Create a Sim this clothing item appears in. Either `kMaster`, `kInitial`, `kUpdateHead`, `kUpdateBody`, `kSalon`, `kSalonNPC`, `kBoutique`, `kCostume`, `kCostumeNPC` or `kPreSell`.
+
+## Body Model List
+
+<details>
+	<summary>A list of every body in MySims</summary>
+	<Grid>
+		{Object.keys(BodyList).map(m => (
+			<div class="gridItem">
+				<code>{m}</code>
+				<Turntable style={{ background: "black" }} folder={`clothing/${m}`} size={300}/>
+			</div>
+		))}
+	</Grid>
+</details>
