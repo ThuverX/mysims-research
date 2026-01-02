@@ -1,7 +1,7 @@
 # Creating a global mod (Controller)
 > ⚠️ **The modloader is still undergoing changes.**
 
-> **This approach requires you to make use of the [MySims ModLoader](../index).**
+> **This approach requires you to make use of the [MySims ModLoader](/Modding/).**
 > **Make sure you've set that up first before proceeding!**
 
 From this point on, the term "global mod" will be now considered a "Controller" as that's what Maxis has done as well.

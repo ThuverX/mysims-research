@@ -49,7 +49,7 @@ Some of these formats are based on the research done by [Morcutool](https://gith
 |[Lua](Files/Lua)|MySims/Kingdom|`0x474999B4`|Scripts|
 |[Fx](Files/Shader)|MySims/Kingdom|`0x6B772503`|Shader file|
 |[Swarm](Files/Swarm)|MySims/Kingdom|`0xCF60795E`|Particle effects|
-|[FootprintSet](Files/Footprintset)|MySims/Kingdom|`0x2C81B60A`|Pathfinding information|
+|[FootprintSet](Files/FootprintSet)|MySims/Kingdom|`0x2C81B60A`|Pathfinding information|
 |[MaterialSet](Files/Material/MySims#material-set)|MySims/Kingdom|`0x02019972`|List of materials|
 |[DDS](https://en.wikipedia.org/wiki/DirectDraw_Surface)|MySims/Kingdom|`0x00B2D882`|Texture file|
 |[TTF](https://en.wikipedia.org/wiki/TrueType)|MySims/Kingdom|`0xFD72D418`|TrueType font file|
