@@ -1,5 +1,6 @@
 import {Turntable, Grid} from '@site/src/components/Turntable';
 import {BodyList} from '@site/src/bodyList';
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 # Adding new clothing
 
@@ -47,14 +48,14 @@ Can be `F`, `M` or `U`. For `Female`, `Male` or `Universal`. I suggest keeping t
 ### Texture
 The name of texture for this clothing piece without the `.dds`. Here's an example for the above XML:
 
-<img alt="shirt_tex" src="/img/shirt_tex.png" height="512" />
+<img alt="shirt_tex" src={useBaseUrl(`/img/shirt_tex.png`)} height="512" />
 *(Amazing I know)*
 
 
 ### Mask
 The name of the texture for the skin mask (without the `.dds`), this is a system introduced in Cozy Bundle allowing any skin color on any clothing item.
 
-<img alt="shirt_mask" src="/img/shirt_mask.png" height="512" />
+<img alt="shirt_mask" src={useBaseUrl(`/img/shirt_mask.png`)} height="512" />
 
 The darkness of a pixel determines shadow on the skin, while transparency means that there is no skin here.
 
