@@ -3,25 +3,31 @@
 Specific model files used only in the windows version of MySims. We don't know their exact extension, but the Taco Bell version refers to them as Win32Models. They can contain a list of models and a list of [drawables](#drawable).
 
 ## Drawables
-Drawables are parts of a model that usually share the same material. The game refers to them as "Drawables". They contain a reference to a [Material](./Material/MySims), a vertex list, and a face list.
+Drawables are parts of a model that share the same material. They contain a reference to a [Material](./Material/MySims), a vertex list, and a face list.
 
 ### Vertex keys
-Vertices are read using a list of vertex keys, which tell the engine how the vertices should be read. This is mostlikely done for space optimization.
+Vertices are read using a list of vertex keys, which tell the engine how the vertices should be read. This is done for space optimization.
 
 ```c
+enum VertexKeySize : u8 {
+    kFloat2 = 1,            // used by uv's
+    kFloat3 = 2,            // used by position, normal and weights
+    kU32 = 4                // used by vertex groups
+};
 
-enum VertexKeyType: u8 {
-    FLOAT2 = 1,
-    FLOAT3 = 2,
-    FLOAT = 4,
-    UNKNOWN = 0
+enum VertexKeyIndex : u8 {
+    kPosition = 0,          // Vector3
+    kNormal = 1,            // Vector3
+    kUv = 2,                // Vector2
+    kBoneGroups = 3,        // 4 u8's
+    kWeight = 4,            // Vector3
 };
 
 struct VertexKey {
     u32 offset;
-    VertexKeyType type;
-    u8 index; // where to put this data inside the vertex, think position, normal or uv
-    u8 subIndex; // used with the uv, to tell if it should be placed in UV2, usually 0
+    VertexKeySize size;
+    VertexKeyIndex index;
+    u8 subIndex;
 };
 ```
 
@@ -52,21 +58,23 @@ struct Bounds {
     Vector3 max;
 };
 
-enum VertexKeyType : u8 {
+enum VertexKeySize : u8 {
     kFloat2 = 1,
     kFloat3 = 2,
-    kFloat = 4
+    kU32 = 4
 };
 
 enum VertexKeyIndex : u8 {
     kPosition = 0,
     kNormal = 1,
     kUv = 2,
+    kBoneGroups = 3,
+    kWeight = 4,
 };
 
 struct VertexKey {
     u32 offset;
-    VertexKeyType type;
+    VertexKeySize size;
     VertexKeyIndex index;
     u8 subIndex;
 };
@@ -88,7 +96,7 @@ struct Bone {
 
 struct Rig {
     u32 numBones;
-    type::Hex<u32> boneHashes[numBones];
+    u32 boneHashes[numBones];
     Bone bones[numBones];
 };
 
