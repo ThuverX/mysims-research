@@ -129,7 +129,7 @@ struct WindowsModel {
     if(numExtraParams > 0) {
         u32 extraParamKeys[numExtraParams];
         u32 extraParamValueSize;
-        std::string::NullString extraPramsValues[numExtraParams];
+        std::string::NullString extraParamsValues[numExtraParams];
     } else {
         padding[1];
     }
