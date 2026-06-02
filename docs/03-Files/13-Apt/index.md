@@ -8,9 +8,9 @@ Apt is the UI system used in MySims (2010), MySims Cozy Bundle and MySims Kingdo
 
 Apt is split up in 3 file types:
 
-|Name|Magic|Extension|Purpose|
-|-|-|-|-|
-|[Big](Big)|`BIGF`|.big|Archive format that holds all other `.apt` UI files.|
-|[Apt](Apt)|`Apt Data`|.apt|Main file format, holds element description, import export references and action script code.|
-|[Const](Const)|`Apt Constant File`|.const|Contains a list of constants used in the `.apt` file.|
-|[Geo](Geo)|`Apt PCGL geometry File`|.geo|Contains 2d vertices used to draw the `.apt` element on.|
+| Name           | Magic                    | Extension | Purpose                                                                                       |
+|----------------|--------------------------|-----------|-----------------------------------------------------------------------------------------------|
+| [Big](Big)     | `BIGF`                   | .big      | Archive format that holds all other `.apt` UI files.                                          |
+| [Apt](Apt)     | `Apt Data`               | .apt      | Main file format, holds element description, import export references and action script code. |
+| [Const](Const) | `Apt Constant File`      | .const    | Contains a list of constants used in the `.apt` file.                                         |
+| [Geo](Geo.mdx) | `Apt PCGL geometry File` | .geo      | Contains 2d vertices used to draw the `.apt` element on.                                      |
