@@ -11,88 +11,175 @@ DBPF have some different names for the files that are inside, in this documentat
 
 Its important to note that some of these values have not been unhashed and thus are refered to by their instance id, instead of an actual name.
 
+Both games use DBPF version 2.0, little-endian. Most of the game data is loose files, so only a few packages ship:
+
+| Package | Game | Contents |
+|---|---|---|
+| `GameData_Win64/Textures/Characters/HatHair-Baked.package` | MySims | 627 baked hat and hair textures, plus 2 [key name maps](#key-name-map) naming them |
+| `GameData/Global/*.package` (52 files) | Kingdom | [Load lists](#load-lists): 8975 entries naming the loose files each island, CAS set and boot stage loads |
+
+## Index
+
+The header gives an entry count, an index offset and an index size. The index starts with a flags field, and then has one entry per file.
+
+### Constant fields
+
+Instead of repeating a value that every entry shares, the index can store it once. The flags say which of the three key fields are stored this way:
+
+| Bit | Field |
+|---|---|
+| `0x1` | Type |
+| `0x2` | Group |
+| `0x4` | Instance hi |
+
+For each bit that is set, one `u32` follows the flags, in that bit order. Those fields are then **left out of every entry**. The instance lo is always stored per entry. No other bits are used.
+
+### Entry size
+
+An entry only stores the key fields that are not constant, so entries do not have a fixed size:
+
+```
+entrySize = 16 + 4 * (number of key fields that are not constant)
+```
+
+Entries can also end with a compression field and a committed field, adding another 4 bytes. These only appear with index minor version 3. The index size can be used to tell: the long form is in use when `(indexSize - 4 - 4 * constantCount) / entryCount` equals `20 + 4 * variableFields`.
+
+In the shipped packages both forms happen to be 28 bytes, for different reasons:
+
+| | MySims | Kingdom |
+|---|---|---|
+| Index version | 0.3 | 1.2 |
+| Flags | `0x4`, instance hi is constant (`0x0`) | `0x0`, nothing is constant |
+| Key fields per entry | Type, group, instance lo | Type, group, instance hi, instance lo |
+| Compression field | Yes | No |
+| Entry size | 16 + 8 + 4 = 28 | 16 + 12 = 28 |
+
+### Sizes
+
+An entry has both a `size` (the bytes stored in the package) and a `memSize` (the bytes after decompressing).
+
+Bit 31 of `size` is a flag and has to be masked off before using it as a length. It is set on all 629 entries of the MySims package and clear on all 8975 Kingdom ones, so it seems to go with the long entry form rather than with the data. Masking it off is safe either way.
+
+An entry is compressed when the two sizes differ, and its compression field is not `0`. Short form entries have no compression field, so for those the sizes differing is the only signal. In practice all 627 textures in `HatHair-Baked.package` are compressed, and every Kingdom entry is stored uncompressed.
+
+## Compression
+
+Compressed entries use RefPack, also known as QFS. The stored bytes start with a small header:
+
+| Offset | Type | Name | Notes |
+|---|---|---|---|
+| 0x00 | u8 | flags | `0x80`: sizes are 4 bytes instead of 3. `0x01`: a compressed size comes first. With those two bits masked off, this must be `0x10` |
+| 0x01 | u8 | magic | `0xFB` |
+| 0x02 | u24/u32 | compressed size | Big-endian, only present if flags has `0x01` |
+| ... | u24/u32 | decompressed size | Big-endian |
+
+After that come commands, until the decompressed size is reached. `cc` is the control byte and `b1` to `b3` are the bytes following it. Every command first copies some literal bytes from the input, then copies `length` bytes from `offset + 1` bytes back in the **output**. That copy is byte by byte, because the ranges are allowed to overlap.
+
+| Control byte | Command size | Literals | Copy length | Copy offset (+1) |
+|---|---|---|---|---|
+| `0x00`-`0x7F` | 2 | `cc & 3` | `((cc & 0x1C) >> 2) + 3` | `((cc & 0x60) << 3) + b1` |
+| `0x80`-`0xBF` | 3 | `b1 >> 6` | `(cc & 0x3F) + 4` | `((b1 & 0x3F) << 8) + b2` |
+| `0xC0`-`0xDF` | 4 | `cc & 3` | `((cc & 0x0C) << 6) + 5 + b3` | `((cc & 0x10) << 12) + (b1 << 8) + b2` |
+| `0xE0`-`0xFB` | 1 | `((cc & 0x1F) + 1) * 4` | 0 | |
+| `0xFC`-`0xFF` | 1 | `cc & 3`, then stop | 0 | |
+
+## Key name map
+
+A resource of type `0x0166038C` inside a package, giving names for that package's files by instance. This is where the names of the baked hat and hair textures come from, like `afHeadHatNewspaperCap_hair_2_afHeadHatNewspaperCap_hat_0`.
+
+The MySims package has two. One names all 627 textures. The other is empty, with a count of `0` followed by 24 zero bytes.
+
+```cpp
+struct KeyNameEntry {
+    type::Hex<u64> instance;
+    u32 length;
+    char name[length];      // not null terminated
+};
+
+struct KeyNameMap {
+    u32 version;            // 1
+    u32 count;
+    KeyNameEntry names[count];
+};
+```
+
+## Load lists
+
+<KingdomSpecific />
+
+Kingdom's 52 packages in `GameData/Global/` do not contain any file data. Each entry's data is just the path of a loose file that has the entry's key, optionally null terminated:
+
+```
+GameData_Win64/Textures/Objects/0x00000000!0x01761846917e6da1.dds
+GameData/Objects/0x00000000!0x01761846917e6da1.0xb359c791
+```
+
+So they are lists of what to load, one per island (`IslandAcademy.package` lists 464 files), per CAS set, per transition and per boot stage.
+
 ## Pattern
 
-<Incomplete />
+```cpp
+import type.base;
 
-```c
 using FileType;
-using DBPFFile;
-
-DBPFFile file @ $;
 
 struct DBPFHeader {
-    char magic[4]; // Needs to be DBPF
-
-    u32 majorVersion;
+    char magic[4];              // DBPF
+    u32 majorVersion;           // 2
     u32 minorVersion;
-
-    padding[12];
-
+    u32 userMajorVersion;
+    u32 userMinorVersion;
+    u32 flags;
     u32 dateCreated;
     u32 dateModified;
-
     u32 indexMajorVersion;
     u32 indexEntryCount;
-    u32 firstIndexOffset;
+    u32 firstIndexOffset;       // unused in version 2
     u32 indexSize;
-
     u32 holeEntryCount;
     u32 holeOffset;
     u32 holeSize;
-
     u32 indexMinorVersion;
     u32 indexOffset;
-
     padding[28];
 };
 
-bitfield FieldFlags {
-    resource_type   : 1;
-    resource_group  : 1;
-    instance_hi     : 1;
-    instance_lo     : 1;
-    offset          : 1;
-    file_size       : 1;
-    mem_size        : 1;
-    flags           : 1;
-    padding         : 17;
-};
-
-struct DBPFIndexHeader {
-    FieldFlags fieldFlags;
-    if(fieldFlags.resource_type) {
-        u32 resourceType;
-    }
-    if(fieldFlags.resource_group) {
-        u32 resourceGroup;
-    }
-    if(fieldFlags.instance_hi) {
-        u32 instanceHi;
-    }
-    if(fieldFlags.instance_lo) {
-        u32 instanceLo;
-    }
-};
-
-struct DBPFIndex {
-    FileType type;
-    u32 group;
-    u32 instance_hi;
-    u32 instance_lo;
-    u64 instance;
+struct DBPFIndexEntry<auto constantFlags, auto hasCompression> {
+    if((constantFlags & 1) == 0)
+        FileType fileType;
+    if((constantFlags & 2) == 0)
+        type::Hex<u32> group;
+    if((constantFlags & 4) == 0)
+        type::Hex<u32> instanceHi;
+    type::Hex<u32> instanceLo;
     u32 offset;
-    u32 fileSize;
+    u32 size;                   // mask off bit 31 to get the length
     u32 memSize;
-    u16 isCompressed;
-    u16 ukn1;
+    if(hasCompression) {
+        u16 compression;        // 0xFFFF: RefPack, 0: stored
+        u16 committed;
+    }
+};
+
+struct DBPFIndex<auto count, auto indexSize> {
+    u32 constantFlags;
+    if(constantFlags & 1)
+        FileType constantType;
+    if(constantFlags & 2)
+        type::Hex<u32> constantGroup;
+    if(constantFlags & 4)
+        type::Hex<u32> constantInstanceHi;
+
+    u32 constantCount = (constantFlags & 1) + ((constantFlags >> 1) & 1) + ((constantFlags >> 2) & 1);
+    u32 variableFields = 3 - constantCount;
+    bool hasCompression = count == 0 || (indexSize - 4 - 4 * constantCount) / count == 20 + 4 * variableFields;
+
+    DBPFIndexEntry<constantFlags, hasCompression> entries[count];
 };
 
 struct DBPFFile {
     DBPFHeader header;
-    $ = header.indexOffset;
-    DBPFIndexHeader indexHeader;
-    DBPFIndex indicies[header.indexEntryCount]; // TODO: use fieldflags
+    DBPFIndex<header.indexEntryCount, header.indexSize> index @ header.indexOffset;
 };
 
 enum FileType: u32 {
@@ -118,10 +205,13 @@ enum FileType: u32 {
     LightSetBin = 0x50002128,
     xml = 0xdc37e964,
     FootPrintSet = 0x2c81b60a,
+    FootPrintSet2 = 0x8101a6ea,
     ObjectConstructionXml = 0xc876c85e,
     ObjectConstructionBin = 0xc08ec0ee,
     SlotXml = 0x4045d294,
     SlotBin = 0x487bf9e4,
+    SnapBin = 0xb70f1cea,
+    ObjectGridVolumeBin = 0xd00decf5,
     swm = 0xcf60795e,
     SwarmBin = 0x9752e396,
     XmlBin = 0xe0d83029,
@@ -129,7 +219,6 @@ enum FileType: u32 {
     CABBin = 0xc644f440,
     big = 0x5bca8c06,
     bnk = 0xb6b5c271,
-    lua = 0x474999b4,
     luo = 0x2b8e2411,
     LightBoxXml = 0xb61215e9,
     LightBoxBin = 0xd6215201,
@@ -137,4 +226,12 @@ enum FileType: u32 {
     ttf = 0xfd72d418,
     ttc = 0x35ebb959
 };
+
+DBPFFile file @ 0x00;
 ```
+
+## Unknowns
+
+- The `committed` field after the compression field. It is `1` on every entry of the MySims package.
+- What bit 31 of an entry's `size` means.
+- The user version, flags, dates and the hole table in the header are never used by the games' packages.
