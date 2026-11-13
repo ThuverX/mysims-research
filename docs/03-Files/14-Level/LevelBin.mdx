@@ -6,9 +6,38 @@
 
 A level is a collection of models, objects and meta data, like grid size.
 
-## Pattern
+Level bins have the type `0x58969018` and are found under `GameData/Levels/`. All values are little-endian. Every file starts with the magic `LLMF` and version `2`.
 
-<Incomplete />
+A level is made of two kinds of models:
+
+- **Base models**: the level's base geometry. Each one is a [Win32 Model](../02-Win32Model.md) instance, drawn once at the origin with no transform.
+- **Objects**: models placed with a position, rotation and scale. Each one can also swap some of its materials for others.
+
+The file ends right after the last object. There is no padding or trailing data.
+
+## Objects
+
+Every object starts with a model instance, a position, a rotation and a scale. The full key for the model is `0x00000000!0x{model}.0xB359C791`.
+
+The rotation is stored as Euler angles in **degrees**. It's applied as `R = Rz * Ry * Rx` (glm's `quat(eulerXYZ)`), and the model matrix is `T * R * S`.
+
+### Material overrides
+
+Objects have a **variable length**. After the scale comes an override count, followed by that many material overrides. Each override is a pair of [Material](../Material/Kingdom) instances: when one of the model's meshes uses the `original` material, it uses `replacement` instead. This lets the same model appear with different materials in different places.
+
+Most objects have no overrides, so the count is usually `0`. That's why it's easy to mistake objects for a fixed 48 bytes.
+
+## Related files
+
+These files have the same instance (group `0`) as the level bin:
+
+| File | Type | Description |
+|---|---|---|
+| LightSetBin | `0x50002128` | The level's lights |
+| Physics | `0xD5988020` | The level's collision. Each base model also has a Physics file with that model's instance |
+| BuildableRegionBin | `0xC84ACD30` | The areas the player can build in |
+
+## Pattern
 
 ```cpp
 import type.base;
@@ -19,33 +48,44 @@ struct Vector3 {
     float z;
 };
 
-struct LevelSceneObject {
-    type::Hex<u64> name;
-    Vector3 pos;
-    Vector3 rot;
-    Vector3 scale;
-    u32 zero;
+struct MaterialOverride {
+    type::Hex<u64> original;    // material instance used by the model
+    type::Hex<u64> replacement; // material instance to use instead
 };
 
+struct LevelObject {
+    type::Hex<u64> model;   // Win32 Model instance
+    Vector3 position;
+    Vector3 rotation;       // Euler angles, in degrees
+    Vector3 scale;
+    u32 overrideCount;
+    MaterialOverride overrides[overrideCount];
+};
 
 struct LevelBinFile {
-    char magic[4];
-    u32 version;
+    char magic[4];          // LLMF
+    u32 version;            // 2
     float startPosX;
     float startPosZ;
     u32 cellSizeX;
     u32 cellSizeZ;
     u32 numCellsX;
     u32 numCellsZ;
-    float; // world bottom? water layer?
-    float;
+    float unknown0;
+    float unknown1;
     u32 modelCount;
     u32 objectCount;
     Vector3 boundsMin;
     Vector3 boundsMax;
-    type::Hex<u64> models[modelCount];
-    LevelSceneObject objects[objectCount];
+    type::Hex<u64> models[modelCount];  // base models, drawn at the origin
+    LevelObject objects[objectCount];
 };
 
 LevelBinFile level @ $;
 ```
+
+## Unknowns
+
+- The two floats at `0x20` and `0x24`.
+- What the start position, cell size and cell count are used for. They match the `GridInfo` fields of the MySims [Level XML](./LevelXml).
+- The bounds are often much larger than the area that actually has objects in it.
