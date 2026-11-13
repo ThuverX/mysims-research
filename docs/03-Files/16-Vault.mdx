@@ -301,9 +301,11 @@ VltFile file @ 0x00;
 ### `.bin`
 
 Dynamic array elements need the logic described in [Dynamic arrays](#dynamic-arrays), so this pattern shows the raw
-entries and data.
+entries and data. Each string table entry shows the string it points at.
 
 ```cpp
+import std.mem;
+import std.string;
 import type.base;
 
 struct BinHeader {
@@ -344,9 +346,38 @@ struct Collection {
     u8 data[dataCapacity];
 };
 
+// An index entry, with the string it points at.
+struct StringEntry {
+    type::Hex<u32> hash;
+    u32 offset;
+    u32 stringCount = std::mem::read_unsigned(0x20, 4);
+    std::string::NullString text @ addressof(parent) + stringCount * 8 + offset;
+};
+
+// The end of the text: past the string with the highest offset.
+fn text_end(u128 index, u32 count) {
+    u128 base = index + count * 8;
+    u32 last = 0;
+    for (u32 i = 0, i < count, i = i + 1) {
+        u32 offset = std::mem::read_unsigned(index + i * 8 + 4, 4);
+        if (offset > last) last = offset;
+    }
+    u128 at = base + last;
+    while (std::mem::read_unsigned(at, 1) != 0) at = at + 1;
+    return at + 1;
+};
+
+struct StringTable {
+    u32 count = parent.header.stringCount;
+    StringEntry index[count];
+    u8 text[text_end(addressof(index), count) - $];
+    u8 tail[while(!std::mem::eof())];
+};
+
 struct BinFile {
     BinHeader header;
     Collection collections[header.collectionCount];
+    StringTable strings;
 };
 
 BinFile file @ 0x00;
