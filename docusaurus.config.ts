@@ -69,6 +69,10 @@ const config: Config = {
 						{
 							label: 'MySims Clubhouse Discord',
 							href: 'https://discord.gg/2j9mU6zNJH',
+						},
+						{
+							label: 'GitHub',
+							href: 'https://github.com/ThuverX/mysims-research',
 						}
 					],
 				}
