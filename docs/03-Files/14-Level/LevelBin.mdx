@@ -6,9 +6,29 @@
 
 A level is a collection of models, objects and meta data, like grid size.
 
-## Pattern
+Level bins have the type `0x58969018` and are found under `GameData/Levels/`. All values are little-endian. Every file starts with the magic `LLMF` and version `2`.
 
-<Incomplete />
+A level is made of two kinds of models:
+
+- **Base models**: the level's base geometry. Each one is a [Win32 Model](../02-Win32Model.md) instance, drawn once at the origin with no transform.
+- **Objects**: models placed with a position, rotation and scale. Each one can also swap some of its materials for others.
+
+The file ends right after the last object. There is no padding or trailing data.
+
+## Objects
+
+Every object starts with a model instance, a position, a rotation and a scale. The full key for the model is `0x00000000!0x{model}.0xB359C791`.
+
+The rotation is stored as Euler angles in **degrees**. It's applied as `R = Rz * Ry * Rx` (glm's `quat(eulerXYZ)`), and the model matrix is `T * R * S`.
+
+### Material overrides
+
+Objects have a **variable length**. After the scale comes an override count, followed by that many material overrides. Each override is a pair of [Material](../Material/Kingdom) instances: when one of the model's meshes uses the `original` material, it uses `replacement` instead. This lets the same model appear with different materials in different places.
+
+Most objects have no overrides, so the count is usually `0`. That's why it's easy to mistake objects for a fixed 48 bytes.
+
+## Related files
+
 These files have the same instance (group `0`) as the level bin:
 
 | File | Type | Description |
