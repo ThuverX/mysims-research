@@ -16,10 +16,10 @@ A vault is a pair of files:
 
 The files are in `GameData/Vaults/`:
 
-| File                          | Description                                                   |
-|-------------------------------|---------------------------------------------------------------|
-| `attribdb.vlt`/`attribdb.bin`   | The vault the game loads (12,361 collections)                 |
-| `attribdbz.vlt`/`attribdbz.bin` | A second vault, a subset of `attribdb` (10,291 collections) |
+| File                                              | Description                                                                       |
+|---------------------------------------------------|-----------------------------------------------------------------------------------|
+| `attribdb.vlt`/`attribdb.bin`                     | The vault the game loads (12,361 collections)                                     |
+| `attribdbz.vlt`/`attribdbz.bin`                   | A second vault, a subset of `attribdb` (10,291 collections)                       |
 | `attribdb.log`, `attribdbz.log`, `dbexporter.log` | Exporter logs that list every type, class, field and collection as `name[0xHASH]` |
 
 ## Hashing
@@ -194,11 +194,11 @@ Entry (8 bytes):
 
 The string table comes after the last collection:
 
-| Type                                   | Name  | Notes                                                             |
-|----------------------------------------|-------|-------------------------------------------------------------------|
+| Type                                    | Name  | Notes                                                                                                      |
+|-----------------------------------------|-------|------------------------------------------------------------------------------------------------------------|
 | `{u32 hash; u32 offset}` × string_count | index | hash of the text (case-sensitive), with exceptions (see below); offset is relative to the end of the index |
-| NUL-terminated strings                 | text  | UTF-8                                                             |
-| u8[]                                   | tail  | unknown, up to the end of the file                                |
+| NUL-terminated strings                  | text  | UTF-8                                                                                                      |
+| u8[]                                    | tail  | unknown, up to the end of the file (597,676 bytes in `attribdb`, none in `attribdbz`)                      |
 
 Not every hash is the hash of its text. In `attribdb`, 1,041 of 1,201 entries are. The other 160 are an empty string
 with hash 0 and 159 strings like `[00030]`, whose hashes are something else.
