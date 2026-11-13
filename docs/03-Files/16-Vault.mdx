@@ -19,8 +19,8 @@ The files are in `GameData/Vaults/`:
 | File                          | Description                                                   |
 |-------------------------------|---------------------------------------------------------------|
 | `attribdb.vlt`/`attribdb.bin`   | The vault the game loads (12,361 collections)                 |
-| `attribdbz.vlt`/`attribdbz.bin` | A second vault, mostly a subset of `attribdb` (10,291 collections) |
-| `attribdb.log`, `dbexporter.log` | Exporter logs that list every type, class, field and collection as `name[0xHASH]` |
+| `attribdbz.vlt`/`attribdbz.bin` | A second vault, a subset of `attribdb` (10,291 collections) |
+| `attribdb.log`, `attribdbz.log`, `dbexporter.log` | Exporter logs that list every type, class, field and collection as `name[0xHASH]` |
 
 ## Hashing
 
@@ -45,7 +45,7 @@ All values are little-endian.
 | 0x00   | u32      | endian marker | always 1             |
 | 0x04   | char[4]  | magic         | `TLAV`               |
 | 0x08   | u32      | version       | 3                    |
-| 0x0C   | u32      | size          | not used             |
+| 0x0C   | u32      | size          | file size minus this header (0x28) |
 | 0x10   | u32      | class_count   |                      |
 | 0x14   | u32      | type_count    | 112 in the shipped vaults |
 | 0x18   | u8[16]   | reserved      | zeros                |
@@ -135,8 +135,10 @@ and look for this shape:
 - `u16 0` at +4 and `u32 0` at +12,
 - and either a field count of zero at +8, or a first field whose type (at +44) is a known type hash.
 
-The last class's trailer runs to the end of the file. Trailers seem to hold
-`(hash("AttribClass"), class)` pairs.
+The last class's trailer runs to the end of the file. Trailers hold pairs of u32. In most pairs the first word is
+`hash("AttribClass")` (`0x26CF8A07`) and the second is the hash of **another** class, apparently one that this class's
+fields refer to (e.g. `fishingcursor` → `gesture`, `character` → `cas_asset` and `reward`). Some pairs start with a
+different word (`inventory`: `0x6DA9159F`, `resource`).
 
 ## `.bin` (collections)
 
@@ -194,9 +196,12 @@ The string table comes after the last collection:
 
 | Type                                   | Name  | Notes                                                             |
 |----------------------------------------|-------|-------------------------------------------------------------------|
-| `{u32 hash; u32 offset}` × string_count | index | hash of the text (case-sensitive); offset is relative to the end of the index |
+| `{u32 hash; u32 offset}` × string_count | index | hash of the text (case-sensitive), with exceptions (see below); offset is relative to the end of the index |
 | NUL-terminated strings                 | text  | UTF-8                                                             |
 | u8[]                                   | tail  | unknown, up to the end of the file                                |
+
+Not every hash is the hash of its text. In `attribdb`, 1,041 of 1,201 entries are. The other 160 are an empty string
+with hash 0 and 159 strings like `[00030]`, whose hashes are something else.
 
 ## Patterns
 
@@ -357,15 +362,16 @@ collection's class in the schema.
   an array, the value is `count` elements of `size` bytes each, stored back to back.
 - **Dynamic arrays** (ARRAY without FIXED_ARRAY): see below.
 - **Undefined entries**: some entries are neither a field of the class nor an array element. Their bytes run from the
-  entry's offset to the next value's offset in the data. If the offset is past `data_used`, the value is the entry's
-  4 bytes.
+  entry's offset to the next value's offset in the data. If the offset is at or past `data_used`, the value is the
+  entry's 4 bytes.
 
 ### Dynamic arrays
 
 The field's own entry holds `u16 offset; u16 count`. The elements are stored in one of two ways:
 
 - **Inline**, when the field has no element entries. There are `count` elements at `offset`, just like a fixed array
-  (e.g. `paint_kit.paints`, `ui_inventory.Item_List`).
+  (e.g. `paint_kit.paints`, `ui_inventory.Item_List`). Only treat an array as inline once every element entry in the
+  collection has been placed in some array, because its elements may be among the unplaced ones.
 - **As entries of their own**. Each element is keyed `fnv1(seed + "[%03d]")` and holds `u16 offset; u16 index`. The
   FNV-1 state `seed` is continued over a suffix such as `[007]`.
 
@@ -380,9 +386,9 @@ recovered from index 0 is then wrong, and it can even match another field's seed
   whose element size equals the step between the group's offsets.
 - Arrays with the same count and element size take their groups in field order. Element blocks are stored in the data
   in field (hash) order.
-- Swapping the last digit of two elements (0↔1, 2↔3, …) gives another seed that both elements share, because the
-  index digits are XORed into the hash. So the key alone can't tell you the order of the elements. Use the stored
-  indices when they differ, and otherwise the offsets.
+- Two elements whose indices differ in exactly one digit, at any position (0↔1, 0↔2, 4↔9, 10↔20, but not 12↔21),
+  share a second seed under the swapped indices, because the index digits are XORed into the hash. So the key alone
+  can't tell you the order of the elements. Use the stored indices when they differ, and otherwise the offsets.
 
 ### Types
 
@@ -427,9 +433,9 @@ All of these are in `attribdb`.
 
 ## Unknowns
 
-- `.vlt`: the header `size`, type `flags`, two u16 in each class header, and the class trailers.
+- `.vlt`: type `flags`, two u16 in each class header, and what the class trailers' pairs mean.
 - `.bin`: the header words at 0x10, 0x18 and 0x28; the collection `vault` and `flags` fields and three u16; the tail
-  after the strings.
+  after the strings; the hashes of the string table's `[000NN]` entries.
 - How a dynamic array's element seed is derived from the field. It is not the hash of the field name, in either case,
   on its own or combined with the class.
 - `MySims.CASAssetInfo` member names.
