@@ -1,58 +1,191 @@
 # Apt Geo
 
-<Incomplete />
+Holds the shapes a movie draws: per shape, a list of batches of 2d triangles. A shape character in
+the [Apt](Apt) file names an object id here, and that object's batches are everything the shape
+consists of.
 
-Describes geometries used in the main `.apt` file, these are 2d models used for drawing on.
+| | |
+|---|---|
+| Magic | `Apt PCGL geometry file\x1a\0`, 24 bytes |
+| Extension | `.geo`, one per [Big](Big) archive, next to the `.apt` and `.const` |
+| Byte order | Little-endian |
+| Offsets | Absolute, from the start of the `.geo`, and 64-bit |
 
-# Pattern
+The file is a memory image: the header points at the object index, each object points at its batch
+table, each table entry points at a batch, and each batch points at its vertices. Nothing is
+interleaved, so the blocks together account for every byte of the file.
+
+## Header
+
+| Offset | Type | Name |
+|---|---|---|
+| 0x00 | char[24] | magic |
+| 0x18 | u64 | objectCount |
+| 0x20 | u64 | indexOffset |
+
+`indexOffset` is `0x28` in every shipped file, so the index follows the header directly. Five
+movies have an `objectCount` of `0` and draw nothing of their own.
+
+## Objects
+
+The index is `objectCount` entries of 16 bytes.
+
+| Offset | Type | Name |
+|---|---|---|
+| 0x00 | u32 | id |
+| 0x04 | u32 | batchCount |
+| 0x08 | u64 | tableOffset |
+
+`id` is the number a shape character's `geometry` field holds; it is not the entry's position, and
+the entries are not sorted by it, so an object has to be looked up by id. Ids are unique within a
+file. `tableOffset` points at `batchCount` 64-bit offsets, one per batch.
+
+## Batches
+
+A batch is one run of geometry with one fill. Every batch starts with the same four fields, then
+carries the fields its type needs.
+
+| Offset | Type | Name |
+|---|---|---|
+| 0x00 | u64 | type |
+| 0x08 | u64 | count |
+| 0x10 | u64 | vertexOffset |
+| 0x18 | u32 | colour |
+
+`count` is triangles for types 1, 4 and 5, and line segments for type 6. `colour` is ARGB, with
+`0xFF` fully opaque. Almost every batch is a 2-triangle quad: 2,429 of the 2,441 triangle batches
+in the shipped movies have a `count` of exactly 2.
+
+### Fills
+
+| Type | Name | Fields from 0x1C |
+|---|---|---|
+| 1 | solid | f32 unknown, always `0` |
+| 4 | textured | the same fields as type 5 |
+| 5 | textured | f32 matrix[16]; u32 image; u32 unknown[2] |
+| 6 | lines | f32 width, always `0` |
+
+A solid batch fills its triangles with `colour`. A textured batch samples an image, with `colour`
+as a tint. A line batch draws `count` segments; the only widths in the shipped movies are `0`,
+which the game draws as a hairline.
+
+`image` is the character id of an [Image character](Apt) in the `.apt`, which names the texture.
+The two `u32` after it are `0` in every batch.
+
+Type 4 occurs in exactly four movies, the two slider gadgets in each game, one batch each. It has
+the same layout as type 5, which holds throughout: the matrix is a well-formed 2d transform, the
+image id names a real Image character, the two trailing `u32` are `0`, and the vertices then
+account for the file's remaining bytes exactly. What makes the game treat it differently from type
+5 is not known.
+
+### Texture matrix
+
+The matrix maps a vertex to a position in the texture. It is 16 floats, row-major, and applies to
+row vectors:
+
+```
+texel = (x, y, 0, 1) · M
+```
+
+Divide by the texture's size for UV coordinates. Only eight of the sixteen cells are ever
+non-zero, the ones a 2d affine transform needs: `m00`, `m01`, `m10`, `m11`, `m30` and `m31`, plus
+`m22` and `m33`, which are always exactly `1`. Scales run from about `-1.78` to `51.2`.
+
+## Vertices
+
+`vertexOffset` points at the batch's points, each a pair of `f32 x, f32 y`. Triangle batches store
+`count * 3` points, three per triangle, with no index buffer; line batches store `count * 2`, two
+per segment. Coordinates are in the movie's own pixel space, the same space the shape character's
+bounds are in.
+
+## Pattern
 
 ```cpp
 import type.base;
 
-struct Vector2 {
+struct Point {
     float x;
     float y;
 };
 
-struct Vertex {
-    Vector2 v1;
-    Vector2 v2;
-    Vector2 v3;
+struct Triangle {
+    Point p[3];
 };
 
-struct AptGeoEntry {
-    u64 type;
-    u64 vertexCount;
+struct Segment {
+    Point p[2];
+};
+
+struct TextureFill {
+    float matrix[16];       // row-major, row vectors: (x, y, 0, 1) * M = texel
+    u32 image;              // Image character id in the .apt
+    u32 unknown[2];
+};
+
+struct Batch {
+    u64 type;               // 1 solid, 4 and 5 textured, 6 lines
+    u64 count;              // triangles, or segments for type 6
     u64 vertexOffset;
-    u32 flags;
-    float;
-    Vertex vertices[vertexCount] @ vertexOffset;
-    if(type == 5) {
-        float matrix[15];
-        u32 textureIndex;
-        u32;
-        u32;
-    }
+    type::Hex<u32> colour;  // ARGB
+    if(type == 1)
+        float unknown;
+    else if(type == 6)
+        float width;        // 0: hairline
+    else if(type == 4 || type == 5)
+        TextureFill fill;
+
+    if(type == 6)
+        Segment segments[count] @ vertexOffset;
+    else
+        Triangle triangles[count] @ vertexOffset;
 };
 
-struct AptPointer {
-    AptGeoEntry* ptr : u64;
+struct BatchPointer {
+    Batch *batch : u64;
 };
 
-struct AptGeoIndex {
-    u32 objectId;
-    u32 geoCount;
+struct GeoObject {
+    u32 id;                 // the id a shape character names
+    u32 batchCount;
     u64 tableOffset;
-   
-    AptPointer geos[geoCount] @ tableOffset;
+
+    BatchPointer batches[batchCount] @ tableOffset;
 };
 
-struct AptGeoFile {
-    char magic[24];
-    u64 numObjects;
-    u64 indexTableStart;
-    AptGeoIndex indicies[numObjects];
+struct GeoFile {
+    char magic[24];         // Apt PCGL geometry file
+    u64 objectCount;
+    u64 indexOffset;
+
+    GeoObject objects[objectCount] @ indexOffset;
 };
 
-AptGeoFile file @ 0;
+GeoFile geo @ 0x00;
 ```
+
+## The 32-bit layout
+
+Two MySims movies, `japan_keyboard` and `test_dialog`, are left over from the game's original
+release and use a 32-bit layout, where every offset and count above is a `u32` instead of a `u64`:
+
+| | 64-bit | 32-bit |
+|---|---|---|
+| Header after the magic | u64 count, u64 index offset | u32 count, u32 index offset (`0x20`) |
+| Object | 16 bytes | 12 bytes |
+| Batch table entry | u64 | u32 |
+| Batch before the fill | 0x1C bytes | 0x10 bytes |
+| Solid batch | 0x20 bytes, an `f32` after the colour | 0x10 bytes, nothing after the colour |
+| Textured batch | 0x68 bytes, two `u32` after the image id | 0x58 bytes, one `u32` after the image id |
+
+Vertices are `f32` pairs in both, so they are the one part the narrower layout does not shrink.
+Only types 1 and 5 occur in the two files. The matching `.const` is how these files are usually
+spotted: bytes 20 to 23 of a 64-bit `.const` magic are zero and those of a 32-bit one are not.
+Nothing else in the games uses this layout.
+
+## Unknowns
+
+- What makes the game treat batch type 4 differently from type 5.
+- The `f32` after a solid batch's colour, always `0`.
+- The `u32` after a textured batch's image id, two of them in the 64-bit layout and one in the
+  32-bit layout, always `0`.
+- Whether a line batch's width is ever non-zero, and what the game does with it.
