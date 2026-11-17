@@ -1,8 +1,27 @@
 # Bnk
 
+<Incomplete />
+
+<CozySpecific />
+
 An audio bank in Audiokinetic's [Wwise](https://www.audiokinetic.com/products/wwise/) format. Both
 games drive all of their audio through Wwise, so a bank holds not just sound data but the events,
 actions and containers that decide what plays.
+
+The original releases are a different format. Wwise arrived with the Cozy Bundle; before it the
+games used EA's own audio, and the move kept the type id and the name `bnk` while replacing
+everything underneath. In the originals the banks live inside the [packages](./DBPF) under this
+same type id rather than as loose files, and the streamed music is `SCHl` in `Sfx/*.strm`:
+
+| Release | Bank magic | Byte order |
+|---|---|---|
+| Wii, MySims and Kingdom | `BNKb` | big-endian |
+| PC 2010 | `BNKl` | little-endian |
+| Cozy Bundle | `BKHD` | little-endian, and Wwise |
+
+The PC release also keeps a per-sample `RuntimeSettings` XML beside every bank, under type
+`0x6D3E3FB4`, holding the volume, 3d falloff, pitch and interruption settings that a Wwise bank
+would carry inside itself. Everything below is the Cozy Bundle.
 
 | | |
 |---|---|
