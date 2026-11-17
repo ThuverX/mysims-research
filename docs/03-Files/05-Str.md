@@ -1,6 +1,5 @@
 # Str
 String files are used to store translated pieces of game text. They also have an XML counterpart.
-Use [this editor](https://github.com/bottledlactose/mysims-str-editor) to edit these files.
 
 ## Pattern
 
