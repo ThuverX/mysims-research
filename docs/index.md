@@ -36,7 +36,8 @@ Some of these formats are based on the research done by [Morcutool](https://gith
 | Name                                                    | Game                                                    | ID[^2]       | Notes                                                |
 |---------------------------------------------------------|---------------------------------------------------------|--------------|------------------------------------------------------|
 | [DBPF](Files/DBPF)                                      | MySims/Kingdom                                          |              | EA's DataBase Packed File, found as `.package` files |
-| [Win32Model](Files/Win32Model)                          | MySims/Kingdom                                          | `0xB359C791` | Only used on all windows versions                    |
+| [Win32Model](Files/Model/Win32Model)                          | MySims/Kingdom                                          | `0xB359C791` | Only used on all windows versions                    |
+| [RevoModel](Files/Model/RevoModel)                            | MySims/Kingdom/Agents                                   | `0xF9E50586` | Only used on the Wii versions; `0x2954E734` in Agents |
 | [Material](Files/Material/MySims)                       | MySims/Kingdom                                          | `0x01D0E75D` | Material information                                 |
 | [Clip](Files/Clip)                                      | MySims/Kingdom                                          | `0x6B20C4F3` | Granny3D animation                                   |
 | Rig                                                     | MySims/Kingdom                                          | `0x8eaf13de` | Granny3D Model rig                                   |

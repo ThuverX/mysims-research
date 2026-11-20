@@ -1,9 +1,11 @@
 # Win32 Model
 
-Specific model files used only in the windows version of MySims. We don't know their exact extension, but the Taco Bell version refers to them as Win32Models. They can contain a list of models and a list of [drawables](#drawable).
+Specific model files used only in the windows version of MySims. We don't know their exact extension, but the Taco Bell version refers to them as Win32Models. They can contain a list of models and a list of [drawables](#drawables).
+
+The Wii releases use [RevoModel](./RevoModel) instead, which holds the same data in a shape the Wii's GPU draws from directly.
 
 ## Drawables
-Drawables are parts of a model that share the same material. They contain a reference to a [Material](./Material/MySims), a vertex list, and a face list.
+Drawables are parts of a model that share the same material. They contain a reference to a [Material](../Material/MySims), a vertex list, and a face list.
 
 ### Vertex keys
 Vertices are read using a list of vertex keys, which tell the engine how the vertices should be read. This is done for space optimization.
